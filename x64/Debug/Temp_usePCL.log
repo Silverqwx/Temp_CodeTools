@@ -1,9 +1,0 @@
-﻿  源5.cpp
-D:\CppLibrary\BuildLibrary\opencv_4.6.0_plusContrib_vs2022\install\include\opencv2\calib3d.hpp(1,1): warning C4819: 该文件包含不能在当前代码页(932)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(78,46): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(78,46): warning C4267: “初始化”: 从“size_t”转换到“const int”，可能丢失数据
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(115,34): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(116,34): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(117,34): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-D:\Projects_2022\Temp_usePCL\Temp_usePCL\源5.cpp(185,40): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-  Temp_usePCL.vcxproj -> D:\Projects_2022\Temp_usePCL\x64\Debug\Temp_usePCL.exe

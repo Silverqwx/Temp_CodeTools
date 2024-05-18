@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-    std::string readDir = "d://OneDrive - Hiroshima University//Doctor Program//Research//3 visualization (not research)//Experiment Task//2024.05.02 AccuracyExperiment//2024.05.11 arrayPts_mOpenCorr_subset192 (rotated to alignment)//";
+    std::string readDir = "d://OneDrive - Hiroshima University//Doctor Program//Research//3 visualization (not research)//Experiment Task//2024.05.02 AccuracyExperiment//2024.05.11 arrayPts_OpenCorr_subset192 (rotated to alignment)//";
     //std::string readDir = "saveCSV//";
     std::string saveDir = "saveCSV//";
     std::string ptsFileName = "calpoints.csv";
@@ -17,25 +17,25 @@ int main()
     int ptNum = 100;
 
     std::vector<cv::Point3d> calPts(ptNum);
-    std::vector<cv::Point3d> expectDisp(dataNum);
+    //std::vector<cv::Point3d> expectDisp(dataNum);
     std::vector<std::vector<cv::Point3d>> dispsSet(dataNum, std::vector<cv::Point3d>(ptNum));
-    std::vector<double> distsRef(ptNum);
+    //std::vector<double> distsRef(ptNum);
     std::vector<std::vector<double>> distsPlaneSet(dataNum, std::vector<double>(ptNum));
-    std::vector<std::vector<double>> distsPlaneSet_rmRef(dataNum, std::vector<double>(ptNum));
+    //std::vector<std::vector<double>> distsPlaneSet_rmRef(dataNum, std::vector<double>(ptNum));
 
-    //set expect disps
-    {
-        expectDisp[0] = cv::Point3d(0.47, 0.0, 0.0);
-        expectDisp[1] = cv::Point3d(1.02, 0.0, 0.0);
-        expectDisp[2] = cv::Point3d(1.46, 0.0, 0.0);
-        expectDisp[3] = cv::Point3d(1.99, 0.0, 0.0);
-        expectDisp[4] = cv::Point3d(2.51, 0.0, 0.0);
-        expectDisp[5] = cv::Point3d(3.01, 0.0, 0.0);
-        expectDisp[6] = cv::Point3d(3.49, 0.0, 0.0);
-        expectDisp[7] = cv::Point3d(3.955, 0.0, 0.0);
-        expectDisp[8] = cv::Point3d(4.46, 0.0, 0.0);
-        expectDisp[9] = cv::Point3d(4.995, 0.0, 0.0);
-    }
+    ////set expect disps
+    //{
+    //    expectDisp[0] = cv::Point3d(0.47, 0.0, 0.0);
+    //    expectDisp[1] = cv::Point3d(1.02, 0.0, 0.0);
+    //    expectDisp[2] = cv::Point3d(1.46, 0.0, 0.0);
+    //    expectDisp[3] = cv::Point3d(1.99, 0.0, 0.0);
+    //    expectDisp[4] = cv::Point3d(2.51, 0.0, 0.0);
+    //    expectDisp[5] = cv::Point3d(3.01, 0.0, 0.0);
+    //    expectDisp[6] = cv::Point3d(3.49, 0.0, 0.0);
+    //    expectDisp[7] = cv::Point3d(3.955, 0.0, 0.0);
+    //    expectDisp[8] = cv::Point3d(4.46, 0.0, 0.0);
+    //    expectDisp[9] = cv::Point3d(4.995, 0.0, 0.0);
+    //}
     //read cal points
     //{
     //    for (int ptIdx = 0; ptIdx < calPts.size(); ptIdx++)
@@ -101,104 +101,79 @@ int main()
             }
         }
     }
-    //fit plane
-    cv::Point3d abc;
-    double plane_d = 1.0;
-    {
-        int rowNum = ptNum;
-
-        cv::Mat A = cv::Mat::ones(rowNum, 3, CV_64FC1);
-        for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
-        {
-            const cv::Point3d& pt3d = calPts[ptIdx];
-
-            A.at<double>(ptIdx, 0) = pt3d.x;
-            A.at<double>(ptIdx, 1) = pt3d.y;
-            A.at<double>(ptIdx, 2) = pt3d.z;
-        }
-        cv::Mat B(rowNum, 1, CV_64FC1, cv::Scalar(-1.0));
-
-        cv::Mat X = (A.t() * A).inv() * A.t() * B;
-
-        abc = cv::Point3d(X.at<double>(0, 0), X.at<double>(1, 0), X.at<double>(2, 0));
-
-        double abcNorm = cv::norm(abc);
-        abc = abc / abcNorm;
-        plane_d = plane_d / abcNorm;
-    }
-    //calculate distances from plane
+    //proc for each step
     for (size_t dataIdx = 0; dataIdx < dataNum; dataIdx++)
     {
-        const std::vector<cv::Point3d>& refPts = calPts;
+        std::vector<cv::Point3d> defPts(ptNum);
         const std::vector<cv::Point3d>& disps = dispsSet[dataIdx];
-        const cv::Point3d& ed = expectDisp[dataIdx];
-        std::vector<double>& distsPlane = distsPlaneSet[dataIdx];
-
-        std::vector<cv::Point3d> procPts(ptNum);
         for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
         {
-            cv::Point3d& procPt = procPts[ptIdx];
-            const cv::Point3d& refPt = refPts[ptIdx];
-            const cv::Point3d& disp = disps[ptIdx];
-
-            procPt = refPt + disp - ed;
-            //procPt = refPt;
+            defPts[ptIdx] = calPts[ptIdx] + disps[ptIdx];
         }
 
-        for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
+        //fit plane
+        cv::Point3d abc;
+        double plane_d = 1.0;
         {
-            double a = abc.x,
-                b = abc.y,
-                c = abc.z;
-            const cv::Point3d& procPt = procPts[ptIdx];
-            double& dist = distsPlane[ptIdx];
+            int rowNum = ptNum;
 
-            dist = a * procPt.x + b * procPt.y + c * procPt.z + plane_d;
+            cv::Mat A = cv::Mat::ones(rowNum, 3, CV_64FC1);
+            for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
+            {
+                const cv::Point3d& pt3d = defPts[ptIdx];
+
+                A.at<double>(ptIdx, 0) = pt3d.x;
+                A.at<double>(ptIdx, 1) = pt3d.y;
+                A.at<double>(ptIdx, 2) = pt3d.z;
+            }
+            cv::Mat B(rowNum, 1, CV_64FC1, cv::Scalar(-1.0));
+
+            cv::Mat X = (A.t() * A).inv() * A.t() * B;
+
+            abc = cv::Point3d(X.at<double>(0, 0), X.at<double>(1, 0), X.at<double>(2, 0));
+
+            double abcNorm = cv::norm(abc);
+            abc = abc / abcNorm;
+            plane_d = plane_d / abcNorm;
         }
-    }
-    for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
-    {
-        const cv::Point3d& refPt = calPts[ptIdx];
 
-        double a = abc.x,
-            b = abc.y,
-            c = abc.z;
-        double& dist = distsRef[ptIdx];
-
-        dist = a * refPt.x + b * refPt.y + c * refPt.z + plane_d;
-    }
-    for (size_t dataIdx = 0; dataIdx < dataNum; dataIdx++)
-    {
-        const std::vector<double>& distsPlane = distsPlaneSet[dataIdx];
-        std::vector<double>& distsPlane_rmRef = distsPlaneSet_rmRef[dataIdx];
-        for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
+        //calculate distances from plane
         {
-            const double& distPlane = distsPlane[ptIdx];
-            const double& distRef = distsRef[ptIdx];
-            double& distPlane_rmRef = distsPlane_rmRef[ptIdx];
-            distPlane_rmRef = distPlane - distRef;
+            std::vector<double>& distsPlane = distsPlaneSet[dataIdx];
+
+            for (size_t ptIdx = 0; ptIdx < ptNum; ptIdx++)
+            {
+                double a = abc.x,
+                    b = abc.y,
+                    c = abc.z;
+                const cv::Point3d& procPt = defPts[ptIdx];
+                double& dist = distsPlane[ptIdx];
+
+                dist = a * procPt.x + b * procPt.y + c * procPt.z + plane_d;
+            }
         }
-    }
-    //save
-    for (size_t fIdx = startFrame; fIdx <= endFrame; fIdx++)
-    {
-        int dataIdx = fIdx - startFrame;
-        const std::vector<double>& saveDists = distsPlaneSet_rmRef[dataIdx];
 
-        std::stringstream ss;
-        ss << fIdx;
-
-        std::string fileName = "distsPlaneF" + ss.str() + ".csv";
-
-        std::ofstream ofile(saveDir + fileName);
-        for (int xyzIdx = 0; xyzIdx < saveDists.size(); xyzIdx++)
+        //save
         {
-            const double& dist = saveDists[xyzIdx];
+            int fIdx = dataIdx + startFrame;
+            const std::vector<double>& saveDists = distsPlaneSet[dataIdx];
 
-            ofile << dist;
-            ofile << endl;
+            std::stringstream ss;
+            ss << fIdx;
+
+            std::string fileName = "distsPlaneF" + ss.str() + ".csv";
+
+            std::ofstream ofile(saveDir + fileName);
+            for (int xyzIdx = 0; xyzIdx < saveDists.size(); xyzIdx++)
+            {
+                const double& dist = saveDists[xyzIdx];
+
+                ofile << dist;
+                ofile << endl;
+            }
+            ofile.close();
         }
-        ofile.close();
+
     }
 
 	return 0;
