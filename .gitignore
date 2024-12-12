@@ -1,2 +1,14 @@
 
 x64/
+
+*.png
+
+Temp_usePCL.vcxproj
+
+Temp_usePCL.vcxproj.filters
+
+*.jpg
+
+*.xml
+
+*.csv

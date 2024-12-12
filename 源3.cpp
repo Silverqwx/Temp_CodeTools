@@ -1,4 +1,6 @@
-//#include <iostream>
+﻿////遮挡目标以外的场景
+// 
+// #include <iostream>
 //#include <fstream>
 //
 //#include <opencv2/opencv.hpp>
